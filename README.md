@@ -7,7 +7,7 @@
 
 As per the instructions, the pre-encoded and decoded values are in the ```ConvertedData.txt``` file
 
-#part2 code test setup
+# part2 code test setup
 
 1) change all ```*.javascript``` files to ```*.js```
 2) ```npm install``` if not done yet
