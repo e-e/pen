@@ -1,0 +1,15 @@
+{
+  "name": "part1",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha",
+    "cli": "node cli.js"
+  },
+  "author": "Eric Ellingson <ellingsonster@gmail.com> (http://eric.wtf/)",
+  "license": "MIT",
+  "dependencies": {
+    "mocha": "^4.0.1"
+  }
+}
