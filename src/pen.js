@@ -1,5 +1,6 @@
-const encoder = require('./encoder');
-
+/**
+ * Draws stuff
+ */
 class Pen {
   /**
    * @param {object} encoder - encoder/decoder module
@@ -9,32 +10,34 @@ class Pen {
   constructor(encoder, rules, instructions = '') {
     this.encoder = encoder;
     this.rules = rules;
-    // @string
     this.rawInstructions = null;
-    // @array
     this.instructions = null;
     this.reset();
     if (instructions.trim().length) {
       this.draw(instructions);
     }
   }
+
   /**
-   * 
+   * Check whether a number is between two other numbers
+   * https://gist.github.com/gordonwoodhull/50eb65d2f048789f9558
    * @param {number} a 
    * @param {number} b 
    * @param {number} c 
+   * @returns {boolean}
    */
-  // https://gist.github.com/gordonwoodhull/50eb65d2f048789f9558
   static between(a, b, c) {
     const eps = 0.0000001;
     return a - eps <= b && b <= c + eps;
   }
   /**
-   * 
+   * Get intersection point of two line segments
+   * https://gist.github.com/gordonwoodhull/50eb65d2f048789f9558
    * @param {object} pt1 - pt1 of segment 1
    * @param {object} pt2 - pt2 of segment 1
    * @param {object} pt3 - pt1 of segment 2
    * @param {object} pt4 - pt2 of segment 2
+   * @returns {object|boolean}
    */
   static intersection(pt1, pt2, pt3, pt4) {
     var x =
@@ -88,9 +91,18 @@ class Pen {
     return { x: Math.ceil(x), y: Math.ceil(y) };
   }
 
+  /**
+   * Getter for the output string
+   * @returns {string}
+   */
   get output() {
     return this.state.output.join('\n').trim();
   }
+
+  /**
+   * Reset the state object
+   * @returns {void}
+   */
   reset() {
     this.state = {
       output: [],
@@ -101,11 +113,22 @@ class Pen {
       outside: false
     };
   }
+
+  /**
+   * Initialize values
+   * @param {string} instructions - String containing the pen instructions
+   * @returns {void}
+   */
   init(instructions) {
     this.reset();
     this.rawInstructions = instructions;
     this.instructions = this.parse(instructions);
   }
+
+  /**
+   * Parse out commands and their arguments
+   * @param {string} instructions - String containing the pen instructions
+   */
   parse(instructions) {
     const keys = Object.keys(this.rules.cmds);
     const re = new RegExp(`(${keys.join('|')})`, 'g');
@@ -124,16 +147,34 @@ class Pen {
     }
     return rules;
   }
+
+  /**
+   * Split a string into segments of n-length
+   * @param {string} args - String to be split
+   * @param {number} n - Length of each segment
+   * @returns {array}
+   */
   splitArgs(args, n = 4) {
     let re = new RegExp(`.{1,${n}}`, 'g');
     return args.match(re);
   }
+
+  /**
+   * Takes instructions and returns the output
+   * @param {string} instructions - String containing the pen instructions
+   * @returns {string}
+   */
   draw(instructions) {
     this.init(instructions);
-    // console.log(this.instructions);
     this.process();
     return this.output;
   }
+
+  /**
+   * Removes any extra characters from the argument string
+   * @param {array} args - String of parameters for a command
+   * @returns {string}
+   */
   shaveArgs(args) {
     if (args.length % 4) {
       let rem = args.length % 4;
@@ -141,6 +182,11 @@ class Pen {
     }
     return args;
   }
+
+  /**
+   * Runs through all commands
+   * @returns {void}
+   */
   process() {
     if (this.instructions.constructor !== Array) {
       throw new Error('Malformed instructions');
@@ -159,6 +205,11 @@ class Pen {
     });
   }
 
+  /**
+   * Takes an array of points [x0, y0, ..., xn, yn] and returns an arra of point objects
+   * @param {array} args 
+   * @returns {array}
+   */
   getPoints(args) {
     let pts = [];
     for (let i = 0; i < args.length - 1; i = i + 2) {
@@ -166,27 +217,40 @@ class Pen {
     }
     return pts;
   }
-  setPosition(x, y, wasOutside) {
-    if (!this.state.outside) {
-      this.state.x += x;
-      this.state.y += y;
-    }
-  }
 
+  /**
+   * Determines if the segment intersects any of the 'canvas' boundaries. The segment is the line
+   * connecting the starting and ending points of the current MV operation
+   * @param {*} pt1 - Pt1 of the segment
+   * @param {*} pt2 - Pt2 of the segment
+   * @returns {boolean}
+   */
   intersects(pt1, pt2) {
     let pt = this.getIntersection(pt1, pt2);
     return pt && !isNaN(pt.x) && !isNaN(pt.y);
   }
+
+  /**
+   * Get the intersection point of the line connecting the starting position and ending position and one
+   * of the four boundary segments (if the intersection exists)
+   * @param {object} pt1 - Pt1 one of the segment
+   * @param {*} pt2 - Pt2 of the segment
+   * @returns {object|boolean}
+   */
   getIntersection(pt1, pt2) {
     for (let i = 0; i < this.rules.settings.segments.length; i++) {
       let seg = this.rules.settings.segments[i];
-      // console.log(pt1, pt2, seg);
       let int = Pen.intersection(pt1, pt2, seg.pt1, seg.pt2);
       if (int && !isNaN(int.x) && !isNaN(int.y)) return int;
     }
     return false;
   }
 
+  /**
+   * Move the pen
+   * @param {array} args 
+   * @returns {void}
+   */
   mv(args) {
     let pts = this.getPoints(args);
     let output = 'MV';
@@ -223,67 +287,30 @@ class Pen {
           this.pen([1]);
           if (wasOutside) {
             output = `${output} (${this.state.x}, ${this.state.y})`;
-            // this.state.output.push(`MV ;`);
           }
         } else {
-          // console.log('skipping...', pt);
-          // we're outside, so go to the next point
-          // continue;
-          // this.state.output.push('SKIPPED');
+          //
         }
       }
-      // console.log(pt);
     });
     if (output !== 'MV') {
       this.state.output.push(`${output};`);
     }
   }
-  /*
-  move(pt) {
-    let wasOut = this.state.outside;
-    let lastx = this.state.x;
-    let lasty = this.state.y;
-    this.state.x += pt.x;
-    this.state.y += pt.y;
-    let pt1 = { x: lastx, y: lasty };
-    let pt2 = { x: this.state.x, y: this.state.y };
-    for (let i = 0; i < this.settings.segments; i++) {
-      let seg = this.settings.segments[i];
-      let intPt = Pen.intersection(pt1, pt2, seg.pt1, seg.pt2);
-      // there is an intersection
-      if (intPt && intPt.x && intPt.y) {
-      }
-    }
-  }
-  mvUp(pt) {
-    this.move(pt);
-    if (!this.state.outside) {
-      this.state.output.push(`MV (${this.state.x}, ${this.state.y});`);
-    }
-  }
-  mvDown(pts) {
-    let ptstr =
-      pts.reduce((str, pt) => {
-        this.move(pt);
-        return `${str} (${this.state.x}, ${this.state.y})`;
-      }, 'MV') + ';';
-    this.state.output.push(ptstr);
-  }
-  */
 
-  /* commands */
-  // mv(args) {
-  //   let pts = this.getPoints(args);
-  //   if (this.state.penDown) {
-  //     this.mvDown(pts);
-  //   } else {
-  //     this.mvUp(pts[0]);
-  //   }
-  // }
+  /**
+   * Clears the 'canvas'. Reset state values to default.
+   * @returns {void}
+   */
   clr() {
     this.reset();
     this.state.output.push('CLR;');
   }
+
+  /**
+   * Moves the pen up or down
+   * @returns {void}
+   */
   pen(args) {
     if (!!args[0]) {
       this.state.output.push('PEN DOWN;');
@@ -293,10 +320,17 @@ class Pen {
       this.state.penDown = false;
     }
   }
+
+  /**
+   * Sets the color of the pen
+   * @returns {void}
+   */
   co(args) {
     this.state.color = args;
     this.state.output.push(`CO ${args[0]} ${args[1]} ${args[2]} ${args[3]};`);
   }
 }
 
-module.exports = Pen;
+if (module && module.exports) {
+  module.exports = Pen;
+}

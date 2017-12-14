@@ -1,7 +1,7 @@
 const assert = require('assert');
 const { encode, decode, isValidHexStr, pad } = require('../src/encoder');
 
-describe('Module', function() {
+describe('Encoder/Module', function() {
   it("should have an 'encode' method", function() {
     assert.equal(typeof encode, 'function');
   });
@@ -19,7 +19,7 @@ describe('Module', function() {
   });
 });
 
-describe('encode()', function() {
+describe('Encoder#encode()', function() {
   it('should return the correctly encoded value', function() {
     const cases = [
       { input: 0, expected: '4000' },
@@ -48,7 +48,7 @@ describe('encode()', function() {
   });
 });
 
-describe('decode()', function() {
+describe('Encoder#decode()', function() {
   it('should return the correctly decoded value', function() {
     const cases = [
       { input: { hi: '40', lo: '00' }, expected: 0 },
@@ -70,9 +70,8 @@ describe('decode()', function() {
       msg = `decoding [${c.input.hi}, ${c.input.lo}] did not return an integer`;
       assert.equal(typeof actual, 'number', msg);
 
-      msg = `encoding [${c.input.hi}, ${
-        c.input.lo
-      }] did not return an integer in the range [-8192..+8191]`;
+      msg = `encoding [${c.input.hi}, ${c.input
+        .lo}] did not return an integer in the range [-8192..+8191]`;
       assert(actual >= -8192 && actual <= 8191);
     });
   });
@@ -81,7 +80,7 @@ describe('decode()', function() {
   });
 });
 
-describe('isValidHexStr()', function() {
+describe('Encoder#isValidHexStr()', function() {
   it('should correctly indicate if value is a valid hexadecimal string', function() {
     const cases = [
       { str: '00', expected: true },
@@ -98,7 +97,7 @@ describe('isValidHexStr()', function() {
   });
 });
 
-describe('pad()', function() {
+describe('Encoder#pad()', function() {
   it('should return correctly padded string', function() {
     const cases = [
       { args: ['00', 5, '0'], expected: '00000' },

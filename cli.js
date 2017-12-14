@@ -1,5 +1,7 @@
 const readline = require('readline');
-const { encode, decode, isValidHexStr } = require('./src/encoder');
+const encoder = require('./src/encoder');
+const Pen = require('./src/Pen');
+const rules = require('./src/rules');
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -13,10 +15,11 @@ function askEncode() {
       console.log('invalid value\n');
       return askEncode();
     }
-    console.log(encode(line).toUpperCase());
-    return encodeOrDecode();
+    console.log(encoder.encode(line).toUpperCase());
+    return encodeDecodeOrPen();
   });
 }
+
 function askDecode() {
   rl.question('enter a 4 character hex string: ', line => {
     line = line.trim();
@@ -26,13 +29,27 @@ function askDecode() {
       return askDecode();
     }
 
-    console.log(decode(line.substr(0, 2), line.substr(2)));
-    return encodeOrDecode();
+    console.log(encoder.decode(line.substr(0, 2), line.substr(2)));
+    return encodeDecodeOrPen();
   });
 }
 
-function encodeOrDecode() {
-  rl.question('encode or decode? (e, d) (x to quit): ', line => {
+function askPen() {
+  rl.question('enter the instructions string: ', line => {
+    line = line.trim();
+
+    if (!line.length) {
+      console.log('invalid value\n');
+      return askPen();
+    }
+    const pen = new Pen(encoder, rules);
+    console.log(pen.draw(line));
+    return encodeDecodeOrPen();
+  });
+}
+
+function encodeDecodeOrPen() {
+  rl.question('encode, decode, or pen? (e, d, p) (x to quit): ', line => {
     line = line.trim().toLowerCase();
     switch (line) {
       case 'x':
@@ -41,12 +58,14 @@ function encodeOrDecode() {
         return askEncode();
       case 'd':
         return askDecode();
+      case 'p':
+        return askPen();
       default:
         console.log('come again?\n');
         break;
     }
-    encodeOrDecode();
+    encodeDecodeOrPen();
   });
 }
 
-encodeOrDecode();
+encodeDecodeOrPen();

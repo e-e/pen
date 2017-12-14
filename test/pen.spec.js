@@ -1,66 +1,10 @@
 const assert = require('assert');
-const Pen = require('../src/pen');
-const encoder = require('../src/encoder');
 
+const Pen = require('../src/Pen');
+const encoder = require('../src/encoder');
 const RULES = require('../src/rules');
-const CASES = [
-  {
-    instructions: 'F0A04000417F4000417FC040004000804001C05F205F20804000',
-    output: [
-      'CLR;',
-      'CO 0 255 0 255;',
-      'MV (0, 0);',
-      'PEN DOWN;',
-      'MV (4000, 4000);',
-      'PEN UP;'
-    ].join('\n')
-  },
-  {
-    instructions:
-      'F0A040004000417F417FC04000400090400047684F5057384000804001C05F204000400001400140400040007E405B2C4000804000',
-    output: [
-      'CLR;',
-      'CO 0 0 255 255;',
-      'MV (0, 0);',
-      'PEN DOWN;',
-      'MV (4000, 0) (4000, -8000) (-4000, -8000) (-4000, 0) (-500, 0);',
-      'PEN UP;'
-    ].join('\n')
-  },
-  {
-    instructions:
-      'F0A0417F40004000417FC067086708804001C0670840004000187818784000804000',
-    output: [
-      'CLR;',
-      'CO 255 0 0 255;',
-      'MV (5000, 5000);',
-      'PEN DOWN;',
-      'MV (8191, 5000);',
-      'PEN UP;',
-      'MV (8191, 0);',
-      'PEN DOWN;',
-      'MV (5000, 0);',
-      'PEN UP;'
-    ].join('\n')
-  },
-  {
-    instructions:
-      'F0A0417F41004000417FC067086708804001C067082C3C18782C3C804000',
-    output: [
-      'CLR;',
-      'CO 255 128 0 255;',
-      'MV (5000, 5000);',
-      'PEN DOWN;',
-      'MV (8191, 3405);',
-      'PEN UP;',
-      'MV (8191, 1596);',
-      'PEN DOWN;',
-      'MV (5000, 0);',
-      'PEN UP;'
-    ].join('\n')
-  }
-];
-describe('Utils', function() {
+
+describe('Pen/Utils', function() {
   it('should correctly determine if two line segments are intersecting', function() {
     let tests = [
       {
@@ -80,16 +24,103 @@ describe('Utils', function() {
           { x: 8191, y: -8192 }
         ],
         intersection: { x: 8191, y: 3405 }
+      },
+      {
+        segments: [
+          { x: 1, y: 3 },
+          { x: -1, y: -3 },
+          { x: 3, y: 0 },
+          { x: 3, y: -1 }
+        ],
+        intersection: false
       }
     ];
     tests.forEach(test => {
       let actual = Pen.intersection(...test.segments);
-      assert.deepEqual(actual, test.intersection);
+      assert.deepEqual(
+        actual,
+        test.intersection,
+        `Test failed for ${JSON.stringify(test)}`
+      );
+    });
+  });
+
+  it('should correctly determine if a number is between two other numbers', function() {
+    const tests = [
+      { nums: [1, 2, 3], expected: true },
+      { nums: [2, 1, 3], expected: false },
+      { nums: [1000, 4000, 4001], expected: true }
+    ];
+    tests.forEach(test => {
+      let actual = Pen.between(...test.nums);
+      assert.equal(
+        actual,
+        test.expected,
+        `Test failed for ${JSON.stringify(test.nums)}`
+      );
     });
   });
 });
 
-describe('Draw', function() {
+describe('Pen#draw()', function() {
+  const CASES = [
+    {
+      instructions: 'F0A04000417F4000417FC040004000804001C05F205F20804000',
+      output: [
+        'CLR;',
+        'CO 0 255 0 255;',
+        'MV (0, 0);',
+        'PEN DOWN;',
+        'MV (4000, 4000);',
+        'PEN UP;'
+      ].join('\n')
+    },
+    {
+      instructions:
+        'F0A040004000417F417FC04000400090400047684F5057384000804001C05F204000400001400140400040007E405B2C4000804000',
+      output: [
+        'CLR;',
+        'CO 0 0 255 255;',
+        'MV (0, 0);',
+        'PEN DOWN;',
+        'MV (4000, 0) (4000, -8000) (-4000, -8000) (-4000, 0) (-500, 0);',
+        'PEN UP;'
+      ].join('\n')
+    },
+    {
+      instructions:
+        'F0A0417F40004000417FC067086708804001C0670840004000187818784000804000',
+      output: [
+        'CLR;',
+        'CO 255 0 0 255;',
+        'MV (5000, 5000);',
+        'PEN DOWN;',
+        'MV (8191, 5000);',
+        'PEN UP;',
+        'MV (8191, 0);',
+        'PEN DOWN;',
+        'MV (5000, 0);',
+        'PEN UP;'
+      ].join('\n')
+    },
+    {
+      instructions:
+        'F0A0417F41004000417FC067086708804001C067082C3C18782C3C804000',
+      output: [
+        'CLR;',
+        'CO 255 128 0 255;',
+        'MV (5000, 5000);',
+        'PEN DOWN;',
+        'MV (8191, 3405);',
+        'PEN UP;',
+        'MV (8191, 1596);',
+        'PEN DOWN;',
+        'MV (5000, 0);',
+        'PEN UP;'
+      ].join('\n')
+    }
+  ];
+
   it('should output the correct instructions', () => {
     const p = new Pen(encoder, RULES);
     CASES.forEach(c => {
