@@ -12,4 +12,4 @@ As per the instructions, the pre-encoded and decoded values are in the ```Conver
 1) change all ```*.javascript``` files to ```*.js```
 2) ```npm install``` if not done yet
 3) ```npm test``` to run tests
-4) ```npm run cli``` to run the cli to test the ```encode``` and ```decode``` methods, or the generate "pen" output
+4) ```npm run cli``` to run the cli to test the ```encode``` and ```decode``` methods, or the enter instructions to generate "pen" output
