@@ -5,7 +5,7 @@ class Pen {
   /**
    * @param {object} encoder - encoder/decoder module
    * @param {object} rules - Pen rules object (settings)
-   * @param {*} [instructions] - 
+   * @param {*} [instructions] -
    */
   constructor(encoder, rules, instructions = '') {
     this.encoder = encoder;
@@ -21,9 +21,9 @@ class Pen {
   /**
    * Check whether a number is between two other numbers
    * https://gist.github.com/gordonwoodhull/50eb65d2f048789f9558
-   * @param {number} a 
-   * @param {number} b 
-   * @param {number} c 
+   * @param {number} a
+   * @param {number} b
+   * @param {number} c
    * @returns {boolean}
    */
   static between(a, b, c) {
@@ -207,7 +207,7 @@ class Pen {
 
   /**
    * Takes an array of points [x0, y0, ..., xn, yn] and returns an arra of point objects
-   * @param {array} args 
+   * @param {array} args
    * @returns {array}
    */
   getPoints(args) {
@@ -248,7 +248,7 @@ class Pen {
 
   /**
    * Move the pen
-   * @param {array} args 
+   * @param {array} args
    * @returns {void}
    */
   mv(args) {
@@ -331,6 +331,8 @@ class Pen {
   }
 }
 
-if (module && module.exports) {
+if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
   module.exports = Pen;
+} else {
+  window.Pen = Pen;
 }

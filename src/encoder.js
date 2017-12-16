@@ -69,4 +69,8 @@ const decode = (hi, lo) => {
   return lo + (hi << 7) - 8192;
 };
 
-module.exports = { encode, decode, isValidHexStr, pad };
+if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
+  module.exports = { encode, decode, isValidHexStr, pad };
+} else {
+  window.encoder = { encode, decode, isValidHexStr, pad };
+}
